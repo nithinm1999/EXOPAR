@@ -1,0 +1,54 @@
+from sklearn.datasets import load_iris
+from sklearn.cross_validation import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.cross_validation import cross_val_score
+from sklearn import metrics
+import pandas as pd
+import numpy as np
+
+df = pd.read_csv("final1.csv", low_memory=False)
+df = pd.read_csv("Target 1.csv", low_memory=False)
+
+df = df.append(pd.read_csv("Target 2.csv", low_memory=False))
+df = df.append(pd.read_csv("Target 3.csv", low_memory=False))
+
+df = df.append(pd.read_csv("Target 4.csv", low_memory=False))
+
+df = df.append(pd.read_csv("Target 5.csv", low_memory=False))
+
+df = df.append(pd.read_csv("Target 6.csv", low_memory=False))
+df.head()
+df = df[(df[['f1','f2','f3','f4','f5','f6','f7','f8','f9']] != 0).all(axis=1)]
+y = df['Target']
+X = df[['f1','f2','f3','f4','f5','f6','f7','f8','f9']]
+print(df[(df[['f1','f2','f3','f4','f5','f6','f7','f8','f9']] != 0).all(axis=1)].shape[0])
+
+X_train,X_test,y_train,y_test=train_test_split(X,y,random_state=2)
+print(y_train.as_matrix().astype(float).shape)
+print(X_train.as_matrix().astype(float).shape)
+
+knn=KNeighborsClassifier(n_neighbors=5)
+knn.fit(X_train.as_matrix(),y_train.as_matrix().astype(float))
+y_pred=knn.predict(X_test.as_matrix())
+print(metrics.accuracy_score(y_test.as_matrix(),y_pred))
+
+from sklearn.cross_validation import cross_val_score
+knn= KNeighborsClassifier(n_neighbors=10)
+scores=cross_val_score(knn,X,y,cv=10,scoring='accuracy')
+print(scores)
+
+k_range= range(1,31)
+k_scores = []
+for k in k_range:
+    knn = KNeighborsClassifier(n_neighbors=k)
+    scores=cross_val_score(knn,X,y,cv=10,scoring='accuracy')
+    k_scores.append(scores.mean())
+    
+print(k_scores)    
+
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+plt.plot(k_range,k_scores)
+plt.xlabel('Value of k for KNN')
+plt.ylabel('Cross-validation accuracy')
